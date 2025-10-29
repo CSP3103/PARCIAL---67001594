@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from db import get_session
 from models import (Categoria, CategoriaBase, CategoriaActualizacion, CategoriaLecturaConProductos, CategoriaLectura,Producto)
 
-router_categorias = APIRouter(prefix="/categories",tags=["Gestión de Categorías"])
+router_categorias = APIRouter(prefix="/categorias",tags=["Gestión de Categorías"])
 
 @router_categorias.post("/", response_model=CategoriaLectura, status_code=status.HTTP_201_CREATED)
 async def crear_categoria(*, session: Session = Depends(get_session), category_in: CategoriaBase):
@@ -52,7 +52,7 @@ async def actualizar_categoria(*, session: Session = Depends(get_session), categ
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Ya existe otra categoría con el nombre '{category_in.nombre}'.")
 
-@router_categorias.delete("/{category_id}", status_code=status.HTTP_200_OK)
+@router_categorias.delete("/{category_id}", status_code=status.HTTP_200_OK) # ⬅️ CAMBIAMOS A 200 OK
 async def desactivar_categoria(*, session: Session = Depends(get_session), category_id: int):
     """Criterio: DELETE/Desactivar. Devuelve 200 OK con mensaje de confirmación."""
     category = session.get(Categoria, category_id)

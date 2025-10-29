@@ -5,7 +5,7 @@ from pydantic import PositiveInt
 from db import get_session
 from models import (Producto, ProductoBase, ProductoActualizacion, ProductoLecturaConCategoria, ProductoLectura,Categoria, CategoriaLectura)
 
-router_productos = APIRouter(prefix="/products",tags=["Gestión de Productos"])
+router_productos = APIRouter(prefix="/productos",tags=["Gestión de Productos"])
 
 @router_productos.post("/", response_model=ProductoLectura, status_code=status.HTTP_201_CREATED)
 async def crear_producto(*, session: Session = Depends(get_session), product_in: ProductoBase):
