@@ -1,0 +1,21 @@
+# 1. Ignorar la base de datos local de SQLModel (SQLite en este caso)
+*.db
+
+# 2. Ignorar el entorno virtual de Python
+venv/
+.venv/
+env/
+.env/
+
+# 3. Ignorar archivos de configuración de entorno (variables sensibles)
+.env
+
+# 4. Ignorar directorios de caché de compilación de Python (criterio: __pycache__)
+__pycache__/
+*.pyc
+
+# Archivos generados por paquetes/tests
+.pytest_cache/
+
+# Ficheros de logs
+*.log
