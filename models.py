@@ -26,3 +26,35 @@ class ProductoBase(SQLModel):
 class Producto(ProductoBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     categoria: "Categoria" = Relationship(back_populates="productos")
+
+#Esquemas de busquedad y actualizacion
+
+class ProductoLectura(ProductoBase):
+    id: int
+class CategoriaLectura(CategoriaBase):
+    id: int
+
+
+class ProductoLecturaConCategoria(ProductoLectura):
+    categoria: CategoriaLectura
+
+
+class CategoriaLecturaConProductos(CategoriaLectura):
+    productos: List[ProductoLectura] = []
+
+
+class CategoriaActualizacion(SQLModel):
+    nombre: Optional[str] = Field(default=None, unique=True, index=True, min_length=3, max_length=50)
+    descripcion: Optional[str] = None
+    esta_activo: Optional[bool] = None
+
+class ProductoActualizacion(SQLModel):
+    nombre: Optional[str] = None
+    precio: Optional[float] = None
+    stock: Optional[int] = Field(default=None, ge=0)
+    descripcion: Optional[str] = None
+    esta_activo: Optional[bool] = None
+    id_categoria: Optional[int] = None
+
+Categoria.model_rebuild()
+Producto.model_rebuild()
