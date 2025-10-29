@@ -34,3 +34,47 @@ async def obtener_categoria_con_productos(*, session: Session = Depends(get_sess
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada.")
     return category
+
+@router_categorias.patch("/{category_id}", response_model=CategoriaLectura)
+async def actualizar_categoria(*, session: Session = Depends(get_session), category_id: int, category_in: CategoriaActualizacion):
+    """Criterio: PUT/PATCH. Actualiza categoría (200). Maneja errores 404 y 409."""
+    category = session.get(Categoria, category_id)
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada.")
+
+    try:
+        update_data = category_in.model_dump(exclude_unset=True)
+        category.sqlmodel_update(update_data)
+        session.add(category)
+        session.commit()
+        session.refresh(category)
+        return category
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Ya existe otra categoría con el nombre '{category_in.nombre}'.")
+
+@router_categorias.delete("/{category_id}", status_code=status.HTTP_200_OK)
+async def desactivar_categoria(*, session: Session = Depends(get_session), category_id: int):
+    """Criterio: DELETE/Desactivar. Devuelve 200 OK con mensaje de confirmación."""
+    category = session.get(Categoria, category_id)
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada.")
+    if category.esta_activo is False:
+        return {"mensaje": f"Categoría con ID {category_id} ya estaba inactiva. No se realizaron cambios."}
+    
+    category.esta_activo = False
+    
+    statement_products = select(Producto).where(Producto.id_categoria == category_id, Producto.esta_activo == True)
+    products_to_deactivate = session.exec(statement_products).all()
+    
+    productos_desactivados = len(products_to_deactivate)
+    for product in products_to_deactivate:
+        product.esta_activo = False
+        session.add(product)
+
+    session.add(category)
+    session.commit()
+
+    return {
+        "mensaje": f"Categoría con ID {category_id} desactivada exitosamente.",
+        "detalles": f"Se desactivaron {productos_desactivados} productos asociados en cascada."
+    }
