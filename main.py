@@ -12,3 +12,4 @@ def on_startup():
 
 # Registrar Routers
 app.include_router(categorias.router_categorias)
+app.include_router(productos.router_productos)
