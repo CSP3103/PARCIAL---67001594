@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from typing import List, Optional
 from pydantic import PositiveInt
 from db import get_session
-from models import (Producto, ProductoBase, ProductoActualizacion, ProductoLecturaConCategoria, ProductoLectura,Categoria)
+from models import (Producto, ProductoBase, ProductoActualizacion, ProductoLecturaConCategoria, ProductoLectura,Categoria, CategoriaLectura)
 
 router_productos = APIRouter(prefix="/products",tags=["Gestión de Productos"])
 
@@ -108,3 +108,13 @@ async def desactivar_producto(*, session: Session = Depends(get_session), produc
     return {
         "mensaje": f"Producto con ID {product_id} desactivado exitosamente."
     }
+
+@router_productos.get("/{product_id}/category", response_model=CategoriaLectura)
+async def obtener_categoria_por_producto(*, session: Session = Depends(get_session), product_id: int):
+    """Obtiene la categoría a la que pertenece un producto, usando el ID del producto (404)."""
+    
+    product = session.get(Producto, product_id)
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
+
+    return product.categoria
