@@ -91,18 +91,20 @@ async def restar_stock(*, session: Session = Depends(get_session), product_id: i
     session.refresh(product)
     return product
 
-@router_productos.patch("/{product_id}/deactivate", response_model=ProductoLectura)
+@router_productos.delete("/{product_id}", status_code=status.HTTP_200_OK) 
 async def desactivar_producto(*, session: Session = Depends(get_session), product_id: int):
-    """Criterio: Desactivar producto (lo marca como inactivo)[cite: 45]."""
+    """Criterio: DELETE/Desactivar producto (lo marca como inactivo). Devuelve 200 OK con mensaje."""
     product = session.get(Producto, product_id)
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
 
     if product.esta_activo is False:
-        return product 
+        return {"mensaje": f"Producto con ID {product_id} ya estaba inactivo. No se realizaron cambios."}
         
     product.esta_activo = False
     session.add(product)
     session.commit()
-    session.refresh(product)
-    return product
+    
+    return {
+        "mensaje": f"Producto con ID {product_id} desactivado exitosamente."
+    }
