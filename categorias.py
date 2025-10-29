@@ -19,3 +19,4 @@ async def crear_categoria(*, session: Session = Depends(get_session), category_i
         return category
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Ya existe una categoría con el nombre '{category_in.nombre}'.")
+    
