@@ -51,3 +51,42 @@ async def obtener_producto_con_categoria(*, session: Session = Depends(get_sessi
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
     return product
+
+@router_productos.patch("/{product_id}", response_model=ProductoLectura)
+async def actualizar_producto(*, session: Session = Depends(get_session), product_id: int, product_in: ProductoActualizacion):
+    """Criterio: PUT/PATCH. Actualiza producto (200). Maneja errores 404 y 400 (categoría)."""
+    product = session.get(Producto, product_id)
+    if not product:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
+
+    update_data = product_in.model_dump(exclude_unset=True)
+    
+    if 'id_categoria' in update_data and session.get(Categoria, update_data['id_categoria']) is None:
+         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La nueva categoría especificada no existe (400).")
+
+    product.sqlmodel_update(update_data)
+    session.add(product)
+    session.commit()
+    session.refresh(product)
+    return product
+
+@router_productos.patch("/{product_id}/restar_stock", response_model=ProductoLectura)
+async def restar_stock(*, session: Session = Depends(get_session), product_id: int, quantity: PositiveInt = Query(..., description="Cantidad a restar del stock.")):
+    """Criterio: Restar stock. Lógica de Negocio: Gestionar stock (no negativo) y modificar cantidades (400)[cite: 46, 52, 49]."""
+    product = session.get(Producto, product_id)
+    if not product or product.esta_activo == False:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado o inactivo.")
+
+    new_stock = product.stock - quantity
+    
+    if new_stock < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail=f"Stock insuficiente. Stock actual: {product.stock}, se intenta restar: {quantity}."
+        )
+
+    product.stock = new_stock
+    session.add(product)
+    session.commit()
+    session.refresh(product)
+    return product
