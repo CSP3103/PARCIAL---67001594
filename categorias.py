@@ -20,3 +20,17 @@ async def crear_categoria(*, session: Session = Depends(get_session), category_i
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Ya existe una categoría con el nombre '{category_in.nombre}'.")
     
+@router_categorias.get("/", response_model=List[CategoriaLectura])
+async def listar_categorias_activas(*, session: Session = Depends(get_session)):
+    """Criterio: GET all. Lista categorías **solo las activas**[cite: 37]."""
+    statement = select(Categoria).where(Categoria.esta_activo == True)
+    categories = session.exec(statement).all()
+    return categories
+
+@router_categorias.get("/{category_id}", response_model=CategoriaLecturaConProductos)
+async def obtener_categoria_con_productos(*, session: Session = Depends(get_session), category_id: int):
+    """Criterio: Consulta relacional. Obtiene categoría y sus productos (404)[cite: 38]."""
+    category = session.get(Categoria, category_id)
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada.")
+    return category
