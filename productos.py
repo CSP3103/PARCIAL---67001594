@@ -9,7 +9,7 @@ router_productos = APIRouter(prefix="/productos",tags=["Gestión de Productos"])
 
 @router_productos.post("/", response_model=ProductoLectura, status_code=status.HTTP_201_CREATED)
 async def crear_producto(*, session: Session = Depends(get_session), product_in: ProductoBase):
-    """Criterio: POST. Crea producto (201). Lógica: Valida categoría requerida (400)[cite: 50]."""
+    """Criterio: POST. Crea producto."""
     category = session.get(Categoria, product_in.id_categoria)
     if not category:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La categoría especificada no existe (400).")
@@ -29,7 +29,7 @@ async def listar_productos(
     min_stock: Optional[int] = Query(None, description="Filtro 2: Stock mínimo."),
     max_price: Optional[float] = Query(None, description="Filtro 3: Precio máximo.")
 ):
-    """Criterio: GET all con Filtros (Stock, Precio, Categoría)[cite: 42]."""
+    """Criterio: GET all con Filtros (Stock, Precio, Categoría)."""
     statement = select(Producto)
     
     if is_active is not None:
@@ -46,7 +46,7 @@ async def listar_productos(
 
 @router_productos.get("/{product_id}", response_model=ProductoLecturaConCategoria)
 async def obtener_producto_con_categoria(*, session: Session = Depends(get_session), product_id: int):
-    """Criterio: Consulta relacional. Obtiene producto con categoría (404)[cite: 43]."""
+    """Criterio: Consulta relacional. Obtiene producto con categoría."""
     product = session.get(Producto, product_id)
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
@@ -54,7 +54,7 @@ async def obtener_producto_con_categoria(*, session: Session = Depends(get_sessi
 
 @router_productos.patch("/{product_id}", response_model=ProductoLectura)
 async def actualizar_producto(*, session: Session = Depends(get_session), product_id: int, product_in: ProductoActualizacion):
-    """Criterio: PUT/PATCH. Actualiza producto (200). Maneja errores 404 y 400 (categoría)."""
+    """Criterio: PUT/PATCH. Actualiza producto."""
     product = session.get(Producto, product_id)
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
@@ -72,7 +72,7 @@ async def actualizar_producto(*, session: Session = Depends(get_session), produc
 
 @router_productos.patch("/{product_id}/restar_stock", response_model=ProductoLectura)
 async def restar_stock(*, session: Session = Depends(get_session), product_id: int, quantity: PositiveInt = Query(..., description="Cantidad a restar del stock.")):
-    """Criterio: Restar stock. Lógica de Negocio: Gestionar stock (no negativo) y modificar cantidades (400)[cite: 46, 52, 49]."""
+    """Criterio: Restar stock. Lógica de Negocio: Gestionar stock (no negativo) y modificar cantidades."""
     product = session.get(Producto, product_id)
     if not product or product.esta_activo == False:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado o inactivo.")
@@ -93,7 +93,7 @@ async def restar_stock(*, session: Session = Depends(get_session), product_id: i
 
 @router_productos.delete("/{product_id}", status_code=status.HTTP_200_OK) 
 async def desactivar_producto(*, session: Session = Depends(get_session), product_id: int):
-    """Criterio: DELETE/Desactivar producto (lo marca como inactivo). Devuelve 200 OK con mensaje."""
+    """Criterio: DELETE/Desactivar producto (lo marca como inactivo)."""
     product = session.get(Producto, product_id)
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
@@ -111,7 +111,7 @@ async def desactivar_producto(*, session: Session = Depends(get_session), produc
 
 @router_productos.get("/{product_id}/category", response_model=CategoriaLectura)
 async def obtener_categoria_por_producto(*, session: Session = Depends(get_session), product_id: int):
-    """Obtiene la categoría a la que pertenece un producto, usando el ID del producto (404)."""
+    """Obtiene la categoría a la que pertenece un producto, usando el ID del producto."""
     
     product = session.get(Producto, product_id)
     if not product:
