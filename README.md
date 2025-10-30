@@ -26,27 +26,27 @@ He cumplido y superado todos los criterios de aceptación y la lógica de negoci
 
 ---
 
-##  Configuración e Instalación
+###  Configuración e Instalación
 
 Para poner a funcionar la API, necesitas **Python 3.10 o superior**.
 
-### 1. Preparar el Entorno
+## Preparar el Entorno
 
 Asegúrate de estar en la carpeta principal del proyecto:
 
-# 1. Crea y activa el entorno virtual (IMPORTANTE):
+## 1. Crea y activa el entorno virtual (IMPORTANTE):
 python -m venv venv
-# Activa en Windows:
+### Activa en Windows:
 .\venv\Scripts\activate
-# Activa en Mac/Linux:
+### Activa en Mac/Linux:
 source venv/bin/activate
 
-# 2. Instala todas las dependencias del proyecto:
+## 2. Instala todas las dependencias del proyecto:
 pip install -r requirements.txt
-# 3. Archivos de Configuración
+## 3. Archivos de Configuración
 El archivo .gitignore asegura que la base de datos local (tienda.db) y el entorno virtual (venv/) no se suban a GitHub.El archivo .env.example documenta la variable DATABASE_URL que usa el proyecto.
 
-# 4. Ejecutar la API
+## 4. Ejecutar la API
 El proyecto se inicia con Uvicorn. Si es la primera vez, el evento de startup creará automáticamente las tablas en la base de datos local.uvicorn main:app --reload o fastapi dev main.py
 
-# Una vez que el servidor esté corriendo, puedes ver y probar todas las funciones de la API en la documentación de Swagger:http://127.0.0.1:8000/docs
+### Una vez que el servidor esté corriendo, puedes ver y probar todas las funciones de la API en la documentación de Swagger:http://127.0.0.1:8000/docs
