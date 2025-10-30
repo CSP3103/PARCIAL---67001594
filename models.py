@@ -1,13 +1,13 @@
 from typing import List, Optional
 from sqlmodel import Field, Relationship, SQLModel
-from pydantic import PositiveFloat, Field as CampoPydantic
+from pydantic import PositiveFloat
 
 #Modelo Categoria
 
 class CategoriaBase(SQLModel):
     nombre: str = Field(unique=True, index=True, min_length=3, max_length=50)
     descripcion: Optional[str] = None
-    esta_activo: bool = Field(default=True)
+    status: bool = Field(default=True)
 
 class Categoria(CategoriaBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -17,10 +17,10 @@ class Categoria(CategoriaBase, table=True):
 
 class ProductoBase(SQLModel):
     nombre: str = Field(index=True, min_length=3, max_length=100)
-    precio: PositiveFloat = CampoPydantic(..., description="Precio del producto (debe ser positivo).")
+    precio: float = Field(..., description="Precio del producto (debe ser positivo).")
     stock: int = Field(default=0, ge=0) 
     descripcion: Optional[str] = None
-    esta_activo: bool = Field(default=True)
+    status: bool = Field(default=True)
     id_categoria: int = Field(foreign_key="categoria.id", index=True)
 
 class Producto(ProductoBase, table=True):
@@ -46,14 +46,14 @@ class CategoriaLecturaConProductos(CategoriaLectura):
 class CategoriaActualizacion(SQLModel):
     nombre: Optional[str] = Field(default=None, unique=True, index=True, min_length=3, max_length=50)
     descripcion: Optional[str] = None
-    esta_activo: Optional[bool] = None
+    status: Optional[bool] = None
 
 class ProductoActualizacion(SQLModel):
     nombre: Optional[str] = None
     precio: Optional[float] = None
     stock: Optional[int] = Field(default=None, ge=0)
     descripcion: Optional[str] = None
-    esta_activo: Optional[bool] = None
+    status: Optional[bool] = None
     id_categoria: Optional[int] = None
 
 Categoria.model_rebuild()

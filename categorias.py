@@ -23,7 +23,7 @@ async def crear_categoria(*, session: Session = Depends(get_session), category_i
 @router_categorias.get("/", response_model=List[CategoriaLectura])
 async def listar_categorias_activas(*, session: Session = Depends(get_session)):
     """Criterio: GET all. Lista categorías, solo las activas."""
-    statement = select(Categoria).where(Categoria.esta_activo == True)
+    statement = select(Categoria).where(Categoria.status == True)
     categories = session.exec(statement).all()
     return categories
 
@@ -58,17 +58,17 @@ async def desactivar_categoria(*, session: Session = Depends(get_session), categ
     category = session.get(Categoria, category_id)
     if not category:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Categoría no encontrada.")
-    if category.esta_activo is False:
+    if category.status is False:
         return {"mensaje": f"Categoría con ID {category_id} ya estaba inactiva. No se realizaron cambios."}
     
-    category.esta_activo = False
+    category.status = False
     
-    statement_products = select(Producto).where(Producto.id_categoria == category_id, Producto.esta_activo == True)
+    statement_products = select(Producto).where(Producto.id_categoria == category_id, Producto.status == True)
     products_to_deactivate = session.exec(statement_products).all()
     
     productos_desactivados = len(products_to_deactivate)
     for product in products_to_deactivate:
-        product.esta_activo = False
+        product.status = False
         session.add(product)
 
     session.add(category)

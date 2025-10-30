@@ -33,7 +33,7 @@ async def listar_productos(
     statement = select(Producto)
     
     if is_active is not None:
-        statement = statement.where(Producto.esta_activo == is_active)
+        statement = statement.where(Producto.status == is_active)
     if category_id is not None:
         statement = statement.where(Producto.id_categoria == category_id)
     if min_stock is not None:
@@ -74,7 +74,7 @@ async def actualizar_producto(*, session: Session = Depends(get_session), produc
 async def restar_stock(*, session: Session = Depends(get_session), product_id: int, quantity: PositiveInt = Query(..., description="Cantidad a restar del stock.")):
     """Criterio: Restar stock. Lógica de Negocio: Gestionar stock (no negativo) y modificar cantidades."""
     product = session.get(Producto, product_id)
-    if not product or product.esta_activo == False:
+    if not product or product.status == False:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado o inactivo.")
 
     new_stock = product.stock - quantity
@@ -98,10 +98,10 @@ async def desactivar_producto(*, session: Session = Depends(get_session), produc
     if not product:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado.")
 
-    if product.esta_activo is False:
+    if product.status is False:
         return {"mensaje": f"Producto con ID {product_id} ya estaba inactivo. No se realizaron cambios."}
         
-    product.esta_activo = False
+    product.status = False
     session.add(product)
     session.commit()
     
